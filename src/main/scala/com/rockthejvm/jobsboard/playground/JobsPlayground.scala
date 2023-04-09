@@ -1,13 +1,13 @@
 package com.rockthejvm.jobsboard.playground
 
 import cats.effect.*
+import cats.implicits.*
 import com.rockthejvm.jobsboard.core.LiveJobs
 import com.rockthejvm.jobsboard.domain.job.JobInfo
 import doobie.*
 import doobie.hikari.HikariTransactor
 import doobie.implicits.*
 import doobie.util.*
-import cats.implicits.*
 
 object JobsPlayground extends IOApp.Simple {
 
@@ -33,18 +33,18 @@ object JobsPlayground extends IOApp.Simple {
 
   override def run: IO[Unit] = postgresResource.use { xa =>
     for {
-      jobs <- LiveJobs[IO](xa)
-      _ <- IO.println("Ready. Next...") *> IO.readLine
-      id <- jobs.create("daniel@rockthejvm.com", jobInfo)
-      _ <- IO.println("Next...") *> IO.readLine
-      list <- jobs.all()
-      _ <- IO.println(s"All jobs: $list. Next...") *> IO.readLine
-      _ <- jobs.update(id, jobInfo.copy(title = "Software rockstar"))
+      jobs       <- LiveJobs[IO](xa)
+      _          <- IO.println("Ready. Next...") *> IO.readLine
+      id         <- jobs.create("daniel@rockthejvm.com", jobInfo)
+      _          <- IO.println("Next...") *> IO.readLine
+      list       <- jobs.all()
+      _          <- IO.println(s"All jobs: $list. Next...") *> IO.readLine
+      _          <- jobs.update(id, jobInfo.copy(title = "Software rockstar"))
       updatedJob <- jobs.find(id)
-      _ <- IO.println(s"Updated job: $updatedJob. Next...") *> IO.readLine
-      _ <- jobs.delete(id)
-      listAfter <- jobs.all()
-      _ <- IO.println(s"Deleted job. List now: $listAfter. Next...") *> IO.readLine
+      _          <- IO.println(s"Updated job: $updatedJob. Next...") *> IO.readLine
+      _          <- jobs.delete(id)
+      listAfter  <- jobs.all()
+      _          <- IO.println(s"Deleted job. List now: $listAfter. Next...") *> IO.readLine
     } yield ()
   }
 

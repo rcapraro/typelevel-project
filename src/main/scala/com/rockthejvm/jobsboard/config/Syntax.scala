@@ -1,9 +1,9 @@
 package com.rockthejvm.jobsboard.config
 
-import cats.{MonadError, MonadThrow}
-import pureconfig.{ConfigReader, ConfigSource}
 import cats.syntax.flatMap.*
+import cats.{MonadError, MonadThrow}
 import pureconfig.error.ConfigReaderException
+import pureconfig.{ConfigReader, ConfigSource}
 
 import scala.reflect.ClassTag
 
