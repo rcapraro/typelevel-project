@@ -3,8 +3,8 @@ package com.rockthejvm.jobsboard
 import cats.Monad
 import cats.effect.{IO, IOApp}
 import cats.syntax.flatMap.*
-import com.rockthejvm.jobsboard.config.EmberConfig
 import com.rockthejvm.jobsboard.config.Syntax.loadF
+import com.rockthejvm.jobsboard.config.{AppConfig, EmberConfig}
 import com.rockthejvm.jobsboard.http.routes.HealthRoutes
 import com.rockthejvm.jobsboard.modules.*
 import org.http4s.HttpRoutes
@@ -21,14 +21,15 @@ object Application extends IOApp.Simple {
 
   given logger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
-  override def run: IO[Unit] = ConfigSource.default.loadF[IO, EmberConfig].flatMap { config =>
+  override def run: IO[Unit] = ConfigSource.default.loadF[IO, AppConfig].flatMap { case AppConfig(postgresConfig, emberConfig) =>
     val appResource = for {
-      core    <- Core[IO]
+      xa      <- Database.makePostgresResource[IO](postgresConfig)
+      core    <- Core[IO](xa)
       httpApi <- HttpApi[IO](core)
       server <- EmberServerBuilder
         .default[IO]
-        .withHost(config.host)
-        .withPort(config.port)
+        .withHost(emberConfig.host)
+        .withPort(emberConfig.port)
         .withHttpApp(httpApi.endpoints.orNotFound)
         .build
     } yield server
