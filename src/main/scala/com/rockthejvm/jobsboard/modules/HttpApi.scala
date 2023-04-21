@@ -1,7 +1,7 @@
 package com.rockthejvm.jobsboard.modules
 
-import cats.effect.{Concurrent, Resource}
 import cats.effect.kernel.Resource
+import cats.effect.{Concurrent, Resource}
 import cats.syntax.semigroupk.*
 import cats.{Monad, MonadThrow}
 import com.rockthejvm.jobsboard.http.routes.{HealthRoutes, JobRoutes}
