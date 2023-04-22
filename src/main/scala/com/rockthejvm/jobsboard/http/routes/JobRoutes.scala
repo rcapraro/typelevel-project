@@ -9,6 +9,7 @@ import cats.{Monad, MonadThrow}
 import com.rockthejvm.jobsboard.core.Jobs
 import com.rockthejvm.jobsboard.domain.job.{Job, JobInfo}
 import com.rockthejvm.jobsboard.http.responses.FailureResponse
+import com.rockthejvm.jobsboard.http.validation.syntax.*
 import com.rockthejvm.jobsboard.logging.syntax.*
 import io.circe.generic.auto.*
 import org.http4s.HttpRoutes
@@ -20,7 +21,7 @@ import org.typelevel.log4cats.Logger
 import java.util.UUID
 import scala.collection.mutable
 
-class JobRoutes[F[_]: Concurrent: Logger] private (jobs: Jobs[F]) extends Http4sDsl[F] {
+class JobRoutes[F[_]: Concurrent: Logger] private (jobs: Jobs[F]) extends Http4sDsl[F] with HttpValidationDsl[F] {
 
   // GET /jobs?offset=x&limit=y { filters }
   private val allJobsRoute: HttpRoutes[F] = HttpRoutes.of[F] { case GET -> Root =>
@@ -40,23 +41,25 @@ class JobRoutes[F[_]: Concurrent: Logger] private (jobs: Jobs[F]) extends Http4s
 
   // POST /jobs {jobInfo}
   private val createJobRoute: HttpRoutes[F] = HttpRoutes.of[F] { case req @ POST -> Root =>
-    for {
-      jobInfo <- req.as[JobInfo].logError(e => s"Parsing payload failed: $e")
-      jobId   <- jobs.create("TODO@rockthejvm.com", jobInfo)
-      resp    <- Created(jobId)
-    } yield resp
+    req.validate[JobInfo] { jobInfo =>
+      for {
+        jobId <- jobs.create("TODO@rockthejvm.com", jobInfo)
+        resp  <- Created(jobId)
+      } yield resp
+    }
   }
 
   // PUT /jobs/uuid/ {jobInfo}
   private val updateJobRoute: HttpRoutes[F] = HttpRoutes.of[F] { case req @ PUT -> Root / UUIDVar(id) =>
-    for {
-      jobInfo     <- req.as[JobInfo]
-      maybeNewJob <- jobs.update(id, jobInfo)
-      resp <- maybeNewJob match {
-        case Some(_) => Ok()
-        case None    => NotFound(FailureResponse(s"Cannot update job with id $id: not found."))
-      }
-    } yield resp
+    req.validate[JobInfo] { jobInfo =>
+      for {
+        maybeNewJob <- jobs.update(id, jobInfo)
+        resp <- maybeNewJob match {
+          case Some(_) => Ok()
+          case None    => NotFound(FailureResponse(s"Cannot update job with id $id: not found."))
+        }
+      } yield resp
+    }
   }
 
   // DELETE /jobs/uuid

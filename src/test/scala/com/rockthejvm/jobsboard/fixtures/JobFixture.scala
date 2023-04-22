@@ -48,7 +48,7 @@ trait JobFixture {
       "Awesome Company (Spain Branch)",
       "Engineering Manager",
       "An awesome job in Barcelona",
-      "http://www.awesome.com",
+      "https://www.awesome.com",
       false,
       "Barcelona",
       2200.some,
@@ -56,7 +56,7 @@ trait JobFixture {
       "USD".some,
       "Spain".some,
       Some(List("scala", "scala-3", "zio")),
-      "http://www.awesome.com/logo.png".some,
+      "https://www.awesome.com/logo.png".some,
       "Highest".some,
       "Some additional info".some
     )

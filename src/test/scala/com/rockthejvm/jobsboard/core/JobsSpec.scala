@@ -1,7 +1,7 @@
 package com.rockthejvm.jobsboard.core
 
-import cats.effect.testing.scalatest.AsyncIOSpec
 import cats.effect.*
+import cats.effect.testing.scalatest.AsyncIOSpec
 import com.rockthejvm.jobsboard.domain.*
 import com.rockthejvm.jobsboard.fixtures.*
 import doobie.implicits.*
