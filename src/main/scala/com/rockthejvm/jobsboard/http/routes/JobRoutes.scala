@@ -1,13 +1,11 @@
 package com.rockthejvm.jobsboard.http.routes
 
 import cats.effect.Concurrent
-import cats.syntax.applicative.*
-import cats.syntax.flatMap.*
-import cats.syntax.functor.*
-import cats.syntax.semigroupk.*
+import cats.implicits.*
 import cats.{Monad, MonadThrow}
 import com.rockthejvm.jobsboard.core.Jobs
-import com.rockthejvm.jobsboard.domain.job.{Job, JobInfo}
+import com.rockthejvm.jobsboard.domain.job.*
+import com.rockthejvm.jobsboard.domain.pagination.*
 import com.rockthejvm.jobsboard.http.responses.FailureResponse
 import com.rockthejvm.jobsboard.http.validation.syntax.*
 import com.rockthejvm.jobsboard.logging.syntax.*
@@ -20,13 +18,18 @@ import org.typelevel.log4cats.Logger
 
 import java.util.UUID
 import scala.collection.mutable
+import com.rockthejvm.jobsboard.domain.job.JobFilter
 
 class JobRoutes[F[_]: Concurrent: Logger] private (jobs: Jobs[F]) extends Http4sDsl[F] with HttpValidationDsl[F] {
 
-  // GET /jobs?offset=x&limit=y { filters }
-  private val allJobsRoute: HttpRoutes[F] = HttpRoutes.of[F] { case GET -> Root =>
+  object OffsetQueryParam extends OptionalQueryParamDecoderMatcher[Int]("offset")
+  object LimitQueryParam  extends OptionalQueryParamDecoderMatcher[Int]("limit")
+
+  // GET /jobs?limit=x&offset=y { filters }
+  private val allJobsRoute: HttpRoutes[F] = HttpRoutes.of[F] { case req @ POST -> Root :? LimitQueryParam(limit) +& OffsetQueryParam(offset) =>
     for {
-      jobList <- jobs.all()
+      filter  <- req.as[JobFilter]
+      jobList <- jobs.all(filter, Pagination(limit, offset))
       resp    <- Ok(jobList)
     } yield resp
   }
@@ -40,7 +43,7 @@ class JobRoutes[F[_]: Concurrent: Logger] private (jobs: Jobs[F]) extends Http4s
   }
 
   // POST /jobs {jobInfo}
-  private val createJobRoute: HttpRoutes[F] = HttpRoutes.of[F] { case req @ POST -> Root =>
+  private val createJobRoute: HttpRoutes[F] = HttpRoutes.of[F] { case req @ POST -> Root / "create" =>
     req.validate[JobInfo] { jobInfo =>
       for {
         jobId <- jobs.create("TODO@rockthejvm.com", jobInfo)

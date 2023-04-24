@@ -1,8 +1,7 @@
 package com.rockthejvm.jobsboard.logging
 
 import cats.MonadError
-import cats.syntax.applicative.*
-import cats.syntax.monadError.*
+import cats.implicits.*
 import org.typelevel.log4cats.Logger
 
 object syntax {

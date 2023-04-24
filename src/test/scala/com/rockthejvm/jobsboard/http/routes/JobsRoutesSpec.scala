@@ -4,6 +4,7 @@ import cats.effect.IO
 import cats.effect.testing.scalatest.AsyncIOSpec
 import com.rockthejvm.jobsboard.core.Jobs
 import com.rockthejvm.jobsboard.domain.job.*
+import com.rockthejvm.jobsboard.domain.pagination.*
 import com.rockthejvm.jobsboard.fixtures.*
 import io.circe.generic.auto.*
 import org.http4s.*
@@ -16,6 +17,7 @@ import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import java.util.UUID
+import com.rockthejvm.jobsboard.domain.pagination
 
 class JobsRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with Http4sDsl[IO] with JobFixture {
 
@@ -24,6 +26,10 @@ class JobsRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with H
     override def create(ownerEmail: String, jobInfo: JobInfo): IO[UUID] = IO.pure(NewJobUuid)
 
     override def all(): IO[List[Job]] = IO.pure(List(AwesomeJob))
+
+    override def all(filter: JobFilter, pagination: Pagination): IO[List[Job]] =
+      if (filter.remote) IO.pure(List.empty)
+      else IO.pure(List(AwesomeJob))
 
     override def find(id: UUID): IO[Option[Job]] =
       if (id == AwesomeJobUuid)
@@ -67,7 +73,8 @@ class JobsRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with H
     "should return all jobs" in {
       for {
         response <- jobRoutes.orNotFound.run(
-          Request(method = Method.GET, uri = uri"/jobs")
+          Request(method = Method.POST, uri = uri"/jobs")
+            .withEntity(JobFilter())
         )
         jobs <- response.as[List[Job]]
       } yield {
@@ -76,10 +83,23 @@ class JobsRoutesSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with H
       }
     }
 
-    "should create a new job" in {
+    "should return all jobs that satisfy a filter" in {
       for {
         response <- jobRoutes.orNotFound.run(
           Request(method = Method.POST, uri = uri"/jobs")
+            .withEntity(JobFilter(remote = true))
+        )
+        jobs <- response.as[List[Job]]
+      } yield {
+        response.status shouldBe Status.Ok
+        jobs shouldBe List.empty
+      }
+    }
+
+    "should create a new job" in {
+      for {
+        response <- jobRoutes.orNotFound.run(
+          Request(method = Method.POST, uri = uri"/jobs/create")
             .withEntity(AwesomeJob.jobInfo)
         )
         jobId <- response.as[UUID]

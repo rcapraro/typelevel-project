@@ -12,7 +12,7 @@ lazy val log4catsVersion            = "2.5.0"
 lazy val tsecVersion                = "0.4.0"
 lazy val scalaTestVersion           = "3.2.15"
 lazy val scalaTestCatsEffectVersion = "1.4.0"
-lazy val testContainerVersion       = "1.17.6"
+lazy val testContainerVersion       = "1.18.0"
 
 lazy val logbackVersion  = "1.4.6"
 lazy val slf4jVersion    = "2.0.5"

@@ -3,8 +3,7 @@ package com.rockthejvm.jobsboard.http.validation
 import cats.MonadThrow
 import cats.data.Validated
 import cats.data.Validated.{Invalid, Valid}
-import cats.syntax.flatMap.*
-import cats.syntax.functor.*
+import cats.implicits.*
 import com.rockthejvm.jobsboard.http.responses.*
 import com.rockthejvm.jobsboard.http.validation.validators.*
 import com.rockthejvm.jobsboard.logging.syntax.*

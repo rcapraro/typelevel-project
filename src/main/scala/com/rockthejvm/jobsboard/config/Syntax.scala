@@ -1,6 +1,6 @@
 package com.rockthejvm.jobsboard.config
 
-import cats.syntax.flatMap.*
+import cats.implicits.*
 import cats.{MonadError, MonadThrow}
 import pureconfig.error.ConfigReaderException
 import pureconfig.{ConfigReader, ConfigSource}

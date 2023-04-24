@@ -1,7 +1,7 @@
 package com.rockthejvm.jobsboard.http.validation
 
 import cats.data.{Validated, ValidatedNel}
-import cats.syntax.all.*
+import cats.implicits.*
 import cats.syntax.validated.*
 import com.rockthejvm.jobsboard.domain.job.*
 
