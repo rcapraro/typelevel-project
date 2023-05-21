@@ -30,7 +30,22 @@ object validators {
       case Failure(_) => InvalidUrl(fieldName).invalidNel
 
   given jobInfoValidator: Validator[JobInfo] = (jobInfo: JobInfo) => {
-    val JobInfo(company, title, description, externalUrl, remote, location, salaryLow, salaryHigh, currency, country, tags, image, seniority, other) = jobInfo
+    val JobInfo(
+      company,
+      title,
+      description,
+      externalUrl,
+      remote,
+      location,
+      salaryLow,
+      salaryHigh,
+      currency,
+      country,
+      tags,
+      image,
+      seniority,
+      other
+    ) = jobInfo
 
     val validCompany     = validateRequired(company, "company")(_.nonEmpty)
     val validTitle       = validateRequired(title, "title")(_.nonEmpty)

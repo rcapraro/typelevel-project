@@ -91,7 +91,7 @@ class JobsSpec extends AsyncFreeSpec with AsyncIOSpec with Matchers with DoobieS
         val program = for {
           jobs                <- LiveJobs[IO](xa)
           numberOfDeletedJobs <- jobs.delete(AwesomeJobUuid)
-          countOfJobs         <- sql"SELECT COUNT(*) FROM jobs WHERE id = $AwesomeJobUuid".query[Int].unique.transact(xa)
+          countOfJobs <- sql"SELECT COUNT(*) FROM jobs WHERE id = $AwesomeJobUuid".query[Int].unique.transact(xa)
         } yield (numberOfDeletedJobs, countOfJobs)
 
         program.asserting { case (numberOfDeletedJobs, countOfJobs) =>

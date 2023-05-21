@@ -270,5 +270,6 @@ object LiveJobs {
       )
   }
 
-  def apply[F[_]: Applicative: MonadCancelThrow: Logger](xa: Transactor[F]): F[LiveJobs[F]] = new LiveJobs[F](xa).pure[F]
+  def apply[F[_]: Applicative: MonadCancelThrow: Logger](xa: Transactor[F]): F[LiveJobs[F]] =
+    new LiveJobs[F](xa).pure[F]
 }

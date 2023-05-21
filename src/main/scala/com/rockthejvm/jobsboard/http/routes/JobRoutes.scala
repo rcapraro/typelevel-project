@@ -26,12 +26,13 @@ class JobRoutes[F[_]: Concurrent: Logger] private (jobs: Jobs[F]) extends Http4s
   object LimitQueryParam  extends OptionalQueryParamDecoderMatcher[Int]("limit")
 
   // GET /jobs?limit=x&offset=y { filters }
-  private val allJobsRoute: HttpRoutes[F] = HttpRoutes.of[F] { case req @ POST -> Root :? LimitQueryParam(limit) +& OffsetQueryParam(offset) =>
-    for {
-      filter  <- req.as[JobFilter]
-      jobList <- jobs.all(filter, Pagination(limit, offset))
-      resp    <- Ok(jobList)
-    } yield resp
+  private val allJobsRoute: HttpRoutes[F] = HttpRoutes.of[F] {
+    case req @ POST -> Root :? LimitQueryParam(limit) +& OffsetQueryParam(offset) =>
+      for {
+        filter  <- req.as[JobFilter]
+        jobList <- jobs.all(filter, Pagination(limit, offset))
+        resp    <- Ok(jobList)
+      } yield resp
   }
 
   // GET /jobs/uuid
